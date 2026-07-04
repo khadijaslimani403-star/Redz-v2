@@ -1,0 +1,30 @@
+-- تعريف الكائن المسؤول عن إرسال الإشارة للسيرفر (RemoteEvent)
+-- ملاحظة: الأسماء والمصطلحات هنا تقريبية لفهم المنطق البرمجي داخل اللعبة
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local RemoveFruitRemote = Remotes:WaitForChild("RemoveFruitFunction") -- اسم وظيفة إزالة الفاكهة الافتراضي
+
+-- دالة تقوم بإرسال طلب لإزالة الفاكهة الحالية وعمل ريسيت
+local function requestFruitRemovalAndReset()
+    -- 1. إرسال الإشارة للسيرفر لتنفيذ وظيفة الـ NPC
+    -- في البرمجة، السيرفر سيفحص حساب اللاعب الذي أطلق الأمر (أنت) فقط
+    local success = RemoveFruitRemote:InvokeServer() 
+    
+    if success then
+        print("تم إرسال طلب إزالة الفاكهة بنجاح من الحساب الحالي.")
+        
+        -- 2. كود عمل ريسيت (Reset) للاعب الحالي بعد إزالة الفاكهة
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.Health = 0 -- جعل الصحة صفر ليموت اللاعب ويعيد الرست فوراً
+            end
+        end
+    else
+        warn("فشل الطلب، ربما بسبب عدم توفر المال الكافي (50k) في الحساب الحالي.")
+    end
+end
+
+-- تشغيل الدالة تلقائياً بمجرد تشغيل السكربت
+requestFruitRemovalAndReset()
